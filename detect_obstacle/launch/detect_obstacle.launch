@@ -1,0 +1,54 @@
+<launch>
+    <arg name="use_detect"                      default="true"/>
+    <arg name="use_rotate_90_counter_clockwise" default="true"/>
+    <arg name="is_display_origin_color_image"   default="false"/>
+    <arg name="is_display_origin_depth_image"   default="false"/>
+    <arg name="is_display_resize_depth_image"   default="false"/>
+
+    <arg name="topic_camera_info_sub"         default="/color/camera_info"/>
+    <arg name="topic_color_image_sub"         default="/color/image_raw"/>
+    <arg name="topic_depth_image_sub"         default="/depth/image_rect_raw"/>  
+    <arg name="distance_field_detect"         default="2.0"/> 
+    <arg name="distance_field_warning"        default="1.5"/> 
+    <arg name="distance_field_dangerous"      default="1.0"/>
+    <arg name="json_file_path"                default="$(find detect_obstacle)/config/high_accuracy.json"/>
+    <arg name="stereo_module_exposure_1"      default="23000"/>
+
+    <arg name="camera"                   default="/depth_camera"/>
+    <arg name="usb_port_id"              default="2-3"/>
+    <arg name="top_image_resize"         default="238"/>
+    <arg name="bottom_image_resize"      default="238"/>
+    <arg name="left_image_resize"        default="200"/>
+    <arg name="right_image_resize"       default="200"/>
+
+    <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+        <arg name="camera"                      value="$(arg camera)"/>
+        <arg name="usb_port_id"                 value="$(arg usb_port_id)"/>
+        <arg name="json_file_path"              value="$(arg json_file_path)"/>
+        <arg name="stereo_module/exposure/1"    value="$(arg stereo_module_exposure_1)"/>
+    </include>
+
+    <node name="detect_obstacle_depth_camera" pkg="detect_obstacle" type="detect_obstacle_depth_camera.py" output="screen" ns="$(arg camera)">
+        <param name="use_detect"                        value="$(arg use_detect)" />
+        <param name="use_rotate_90_counter_clockwise"   value="$(arg use_rotate_90_counter_clockwise)" />
+        <param name="is_display_origin_color_image"     value="$(arg is_display_origin_color_image)" />
+        <param name="is_display_origin_depth_image"     value="$(arg is_display_origin_depth_image)" />
+        <param name="is_display_resize_depth_image"     value="$(arg is_display_resize_depth_image)" />
+        <param name="camera"                            value="$(arg camera)" />
+        <param name="topic_camera_info_sub"             value="$(arg topic_camera_info_sub)" />
+        <param name="topic_color_image_sub"             value="$(arg topic_color_image_sub)" />
+        <param name="topic_depth_image_sub"             value="$(arg topic_depth_image_sub)" />
+        <param name="top_image_resize"                  value="$(arg top_image_resize)" />
+        <param name="bottom_image_resize"               value="$(arg bottom_image_resize)" />
+        <param name="left_image_resize"                 value="$(arg left_image_resize)" />
+        <param name="right_image_resize"                value="$(arg right_image_resize)" />
+        <param name="distance_field_detect"             value="$(arg distance_field_detect)" />
+        <param name="distance_field_warning"            value="$(arg distance_field_warning)" />
+        <param name="distance_field_dangerous"          value="$(arg distance_field_dangerous)" />
+    </node>
+
+    <arg name="open_rviz" default="false"/>
+    <group if="$(arg open_rviz)"> 
+        <node name="rviz" pkg="rviz" type="rviz" args="-d $(find detect_obstacle)/rviz/depth_image.rviz" required="true" />
+    </group>
+</launch>
